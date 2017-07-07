@@ -5,7 +5,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-type getJobHandle func() (*amqp.Delivery, jobHandle)
+type getJobHandle func() (*amqp.Delivery, jobHandle, uint8)
 
 type worker struct {
 	ctx    context.Context
@@ -36,13 +36,20 @@ func (w *worker) start() {
 }
 
 func (w *worker) executeJob() {
-	message, handle := w.getJob()
+	message, handle, retries := w.getJob()
 	if message == nil || handle == nil {
 		return
 	}
-
-	err := handle(w.ctx, message.Body)
-	if err == nil {
-		message.Ack(false)
+	if retries == 0 {
+		retries = 1
 	}
+
+	for i := retries; i > 0; i-- {
+		err := handle(w.ctx, message.Body)
+		if err == nil {
+			break
+		}
+	}
+
+	message.Ack(false)
 }

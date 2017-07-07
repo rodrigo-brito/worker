@@ -6,24 +6,23 @@ import (
 	"github.com/streadway/amqp"
 )
 
-// Enqueuer can enqueue jobs.
-type Enqueuer struct {
+type enqueuer struct {
 	channel *amqp.Channel
 }
 
 // NewEnqueuer creates a new enqueuer with the specified RabbitMQ channel.
-func NewEnqueuer(channel *amqp.Channel) *Enqueuer {
+func NewEnqueuer(channel *amqp.Channel) *enqueuer {
 	if channel == nil {
 		panic("worker equeuer: needs a non-nil *amqp.Channel")
 	}
 
-	return &Enqueuer{
+	return &enqueuer{
 		channel: channel,
 	}
 }
 
 // Enqueue will enqueue the specified job name and arguments. The args param can be nil if no args ar needed.
-func (e *Enqueuer) Enqueue(jobName string, message []byte) error {
+func (e *enqueuer) Enqueue(jobName string, message []byte) error {
 	queue, err := e.channel.QueueDeclare(
 		jobName, // name
 		true,    // durable

@@ -4,10 +4,12 @@ import "golang.org/x/net/context"
 
 type jobHandle func(context.Context, []byte) error
 
+// JobType settings of job which should be passed to RegisterJob
 type JobType struct {
-	Name     string
-	Handle   jobHandle
-	Priority uint
+	Name     string    // The queue name
+	Handle   jobHandle // The job handler function
+	Priority uint      // Priority from 1 to 10000
+	Retry    uint8     // Retry count 1 to 255
 }
 
 type jobTypes []JobType
